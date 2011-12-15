@@ -173,35 +173,19 @@
             <!-- ShrinkWrap -->
             <dependency>
                 <groupId>org.jboss.shrinkwrap</groupId>
-                <artifactId>shrinkwrap-api</artifactId>
+                <artifactId>shrinkwrap-bom</artifactId>
                 <version>${version.shrinkwrap_shrinkwrap}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.shrinkwrap</groupId>
-                <artifactId>shrinkwrap-spi</artifactId>
-                <version>${version.shrinkwrap_shrinkwrap}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.shrinkwrap</groupId>
-                <artifactId>shrinkwrap-impl-base</artifactId>
-                <version>${version.shrinkwrap_shrinkwrap}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- ShrinkWrap Resolver -->
             <dependency>
                 <groupId>org.jboss.shrinkwrap.resolver</groupId>
-                <artifactId>shrinkwrap-resolver-api</artifactId>
+                <artifactId>shrinkwrap-resolver-bom</artifactId>
                 <version>${version.shrinkwrap_resolver}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.shrinkwrap.resolver</groupId>
-                <artifactId>shrinkwrap-resolver-api-maven</artifactId>
-                <version>${version.shrinkwrap_resolver}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.shrinkwrap.resolver</groupId>
-                <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
-                <version>${version.shrinkwrap_resolver}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- ShrinkWrap Descriptors -->
