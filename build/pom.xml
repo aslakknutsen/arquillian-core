@@ -49,18 +49,43 @@
             </dependency>
             <dependency>
                 <groupId>org.jboss.shrinkwrap.descriptors</groupId>
-                <artifactId>shrinkwrap-descriptors-api</artifactId>
+                <artifactId>shrinkwrap-descriptors-bom</artifactId>
                 <version>${version.shrinkwrap_descriptors}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.shrinkwrap.descriptors</groupId>
-                <artifactId>shrinkwrap-descriptors-spi</artifactId>
+                <artifactId>shrinkwrap-descriptors-impl-base</artifactId>
                 <version>${version.shrinkwrap_descriptors}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.spec</groupId>
+                        <artifactId>jboss-javaee-6.0</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jboss.shrinkwrap.descriptors</groupId>
-                <artifactId>shrinkwrap-descriptors-impl</artifactId>
+                <artifactId>shrinkwrap-descriptors-impl-javaee</artifactId>
                 <version>${version.shrinkwrap_descriptors}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.shrinkwrap.descriptors</groupId>
+                        <artifactId>shrinkwrap-descriptors-api-jboss</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.shrinkwrap.descriptors</groupId>
+                <artifactId>shrinkwrap-descriptors-api-javaee</artifactId>
+                <version>${version.shrinkwrap_descriptors}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.shrinkwrap.descriptors</groupId>
+                        <artifactId>shrinkwrap-descriptors-gen</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>

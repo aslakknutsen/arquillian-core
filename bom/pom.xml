@@ -192,12 +192,7 @@
 
             <dependency>
                 <groupId>org.jboss.shrinkwrap.descriptors</groupId>
-                <artifactId>shrinkwrap-descriptors-api</artifactId>
-                <version>${version.shrinkwrap_descriptors}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.shrinkwrap.descriptors</groupId>
-                <artifactId>shrinkwrap-descriptors-impl</artifactId>
+                <artifactId>shrinkwrap-descriptors-bom</artifactId>
                 <version>${version.shrinkwrap_descriptors}</version>
             </dependency>
 
