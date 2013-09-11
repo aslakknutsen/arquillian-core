@@ -45,6 +45,14 @@ import org.junit.runners.model.Statement;
  */
 public class Arquillian extends BlockJUnit4ClassRunner
 {
+   public static ThreadLocal<Boolean> isNonInheritedChild = new ThreadLocal<Boolean>() {
+      @Override
+      protected Boolean initialValue()
+      {
+         return false;
+      }
+   };
+
    public Arquillian(Class<?> klass) throws InitializationError
    {
       super(klass);

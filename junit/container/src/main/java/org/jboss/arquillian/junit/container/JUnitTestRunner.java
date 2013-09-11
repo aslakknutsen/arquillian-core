@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.arquillian.container.test.spi.TestRunner;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.State;
 import org.jboss.arquillian.test.spi.TestResult;
 import org.jboss.arquillian.test.spi.TestResult.Status;
@@ -51,6 +52,7 @@ public class JUnitTestRunner implements TestRunner
 
    public TestResult execute(Class<?> testClass, String methodName)
    {
+      Arquillian.isNonInheritedChild.set(true);
       TestResult testResult = new TestResult(Status.PASSED);
       ExpectedExceptionHolder exceptionHolder = new ExpectedExceptionHolder();
       try

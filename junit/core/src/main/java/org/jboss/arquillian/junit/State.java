@@ -35,12 +35,52 @@ public class State
     * on client side due to no Exception thrown.
     */
    // Cleaned up in JUnitTestRunner
-   private static ThreadLocal<Throwable> caughtTestException = new InheritableThreadLocal<Throwable>();
+   private static ThreadLocal<Throwable> caughtTestException = new InheritableThreadLocal<Throwable>() {
+
+      private ThreadLocal<Boolean> beenSet = new ThreadLocal<Boolean>() {
+         @Override
+         protected Boolean initialValue() {
+            return false;
+         };
+      };
+
+      @Override
+      public Throwable get()
+      {
+         if(!beenSet.get()) {
+            if(Arquillian.isNonInheritedChild.get()) {
+               beenSet.set(true);
+               set(initialValue());
+            }
+         }
+         return super.get();
+      }
+   };
 
    /*
     * Keep track of previous BeforeSuite initialization exceptions
     */
-   private static ThreadLocal<Throwable> caughtInitializationException = new InheritableThreadLocal<Throwable>();
+   private static ThreadLocal<Throwable> caughtInitializationException = new InheritableThreadLocal<Throwable>(){
+
+      private ThreadLocal<Boolean> beenSet = new ThreadLocal<Boolean>() {
+         @Override
+         protected Boolean initialValue() {
+            return false;
+         };
+      };
+
+      @Override
+      public Throwable get()
+      {
+         if(!beenSet.get()) {
+            if(Arquillian.isNonInheritedChild.get()) {
+               beenSet.set(true);
+               set(initialValue());
+            }
+         }
+         return super.get();
+      }
+   };
 
    /*
     * @HACK
@@ -52,14 +92,52 @@ public class State
     */
    private static ThreadLocal<Integer> lastCreatedRunner = new InheritableThreadLocal<Integer>()
    {
+      private ThreadLocal<Boolean> beenSet = new ThreadLocal<Boolean>() {
+         @Override
+         protected Boolean initialValue() {
+            return false;
+         };
+      };
+
       @Override
       protected Integer initialValue()
       {
          return new Integer(0);
       }
+
+      @Override
+      public Integer get()
+      {
+         if(!beenSet.get()) {
+            if(Arquillian.isNonInheritedChild.get()) {
+               beenSet.set(true);
+               set(initialValue());
+            }
+         }
+         return super.get();
+      }
    };
 
-   private static ThreadLocal<TestRunnerAdaptor> deployableTest = new InheritableThreadLocal<TestRunnerAdaptor>();
+   private static ThreadLocal<TestRunnerAdaptor> deployableTest = new InheritableThreadLocal<TestRunnerAdaptor>() {
+
+      private ThreadLocal<Boolean> beenSet = new ThreadLocal<Boolean>() {
+         @Override
+         protected Boolean initialValue() {
+            return false;
+         };
+      };
+
+      @Override
+      public TestRunnerAdaptor get() {
+         if(!beenSet.get()) {
+            if(Arquillian.isNonInheritedChild.get()) {
+               beenSet.set(true);
+               set(initialValue());
+            }
+         }
+         return super.get();
+      };
+   };
 
    static void runnerStarted()
    {
