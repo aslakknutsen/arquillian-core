@@ -31,6 +31,7 @@ import org.jboss.arquillian.core.spi.ServiceLoader;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.arquillian.test.spi.TestEnricher;
 import org.jboss.arquillian.test.spi.enricher.resource.ResourceProvider;
+import org.jboss.arquillian.test.spi.enricher.resource.ResourceProviderWrapper;
 
 /**
  * ArquillianTestEnricher
@@ -136,6 +137,7 @@ public class ArquillianResourceTestEnricher implements TestEnricher
    private Object lookup(Class<?> type, ArquillianResource resource, List<Annotation> qualifiers)
    {
       Collection<ResourceProvider> resourceProviders = loader.get().all(ResourceProvider.class);
+      Collection<ResourceProviderWrapper> resourceProviderWrappers = loader.get().all(ResourceProviderWrapper.class);
       for(ResourceProvider resourceProvider: resourceProviders)
       {
          if(resourceProvider.canProvide(type))
@@ -144,6 +146,11 @@ public class ArquillianResourceTestEnricher implements TestEnricher
             if(value == null)
             {
                throw new RuntimeException("Provider for type " + type + " returned a null value: " + resourceProvider);
+            }
+            for(ResourceProviderWrapper resourceProviderWrapper : resourceProviderWrappers) {
+                if(resourceProviderWrapper.canWrap(type, qualifiers)) {
+                    value = resourceProviderWrapper.wrap(value, resource, qualifiers);
+                }
             }
             return value;
          }
