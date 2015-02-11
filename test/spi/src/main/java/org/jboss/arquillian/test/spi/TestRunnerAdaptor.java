@@ -18,6 +18,8 @@ package org.jboss.arquillian.test.spi;
 
 import java.lang.reflect.Method;
 
+import org.jboss.arquillian.core.spi.event.Event;
+
 /**
  * TestRunnerAdaptor
  * 
@@ -95,6 +97,17 @@ public interface TestRunnerAdaptor
     * @throws Exception
     */
    TestResult test(TestMethodExecutor testMethodExecutor) throws Exception;
+   
+   /**
+    * Fire any event, custom or known.<br/>
+    * <br/>
+    * This can be used by a TestFramework to trigger e.g. additional Lifecycle
+    * phases not described directly by the Test SPI.
+    * 
+    * @param event Any event
+    * @throws Exception
+    */
+   <T extends Event> void fire(T event) throws Exception;
    
    /**
     * Shutdown Arquillian cleanly.  

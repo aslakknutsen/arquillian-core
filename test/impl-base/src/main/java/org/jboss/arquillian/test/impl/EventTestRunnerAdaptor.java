@@ -28,6 +28,7 @@ import org.jboss.arquillian.core.spi.ManagerBuilder;
 import org.jboss.arquillian.core.spi.NonManagedObserver;
 import org.jboss.arquillian.core.spi.ServiceLoader;
 import org.jboss.arquillian.core.spi.Validate;
+import org.jboss.arquillian.core.spi.event.Event;
 import org.jboss.arquillian.test.spi.LifecycleMethodExecutor;
 import org.jboss.arquillian.test.spi.TestMethodExecutor;
 import org.jboss.arquillian.test.spi.TestResult;
@@ -190,4 +191,8 @@ public class EventTestRunnerAdaptor implements TestRunnerAdaptor
        return executionDecision;
    }
 
+   @Override
+   public <T extends Event> void fire(T event) throws Exception {
+       manager.fire(event);
+   }
 }

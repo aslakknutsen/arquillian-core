@@ -106,7 +106,7 @@ public class TestContextHandler
          testContext.deactivate();
          if (After.class.isAssignableFrom(context.getEvent().getClass()))
          {
-            testContext.destroy(context.getEvent().getTestInstance());
+            //testContext.destroy(context.getEvent().getTestInstance());
          }
       }
    }

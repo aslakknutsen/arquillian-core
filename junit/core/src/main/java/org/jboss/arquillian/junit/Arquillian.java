@@ -23,13 +23,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jboss.arquillian.junit.event.AfterAroundRules;
+import org.jboss.arquillian.junit.event.AroundRules;
 import org.jboss.arquillian.test.spi.LifecycleMethodExecutor;
 import org.jboss.arquillian.test.spi.TestMethodExecutor;
 import org.jboss.arquillian.test.spi.TestResult;
 import org.jboss.arquillian.test.spi.TestResult.Status;
-import org.jboss.arquillian.test.spi.execution.SkippedTestExecutionException;
 import org.jboss.arquillian.test.spi.TestRunnerAdaptor;
 import org.jboss.arquillian.test.spi.TestRunnerAdaptorBuilder;
+import org.jboss.arquillian.test.spi.execution.SkippedTestExecutionException;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.MultipleFailureException;
 import org.junit.internal.runners.model.ReflectiveCallable;
@@ -228,11 +230,52 @@ public class Arquillian extends BlockJUnit4ClassRunner
    }   
 
    @Override
+   protected Statement withBefores(final FrameworkMethod method, final Object target, final Statement originalStatement)
+   {
+      final Statement onlyBefores = super.withBefores(method, target, new EmptyStatement());
+      return new Statement()
+      {
+         @Override
+         public void evaluate() throws Throwable
+         {
+             adaptor.before(
+                  target, 
+                  method.getMethod(), 
+                  new StatementLifecycleExecutor(onlyBefores));
+            originalStatement.evaluate();
+         }
+      };
+   }
+   
+   @Override
+   protected Statement withAfters(final FrameworkMethod method, final Object target, final Statement originalStatement)
+   {
+      final Statement onlyAfters = super.withAfters(method, target, new EmptyStatement());
+      return new Statement()
+      {
+         @Override
+         public void evaluate() throws Throwable
+         {
+            multiExecute
+            (
+               originalStatement, 
+               new  Statement() { @Override public void evaluate() throws Throwable 
+               {
+                  adaptor.after(
+                          target, 
+                          method.getMethod(), 
+                          new StatementLifecycleExecutor(onlyAfters));
+               }}
+            );
+         }
+      };
+   }
+   @Override
    @SuppressWarnings("deprecation")
    protected Statement methodBlock(final FrameworkMethod method) {
-       Object test;
+       Object temp;
        try {
-           test= new ReflectiveCallable() {
+           temp = new ReflectiveCallable() {
                @Override
                protected Object runReflectiveCall() throws Throwable {
                    return createTest();
@@ -241,6 +284,7 @@ public class Arquillian extends BlockJUnit4ClassRunner
        } catch (Throwable e) {
            return new Fail(e);
        }
+       final Object test = temp;
        try
        {
            Method withRules = BlockJUnit4ClassRunner.class.getDeclaredMethod("withRules",
@@ -251,55 +295,40 @@ public class Arquillian extends BlockJUnit4ClassRunner
            statement = possiblyExpectingExceptions(method, test, statement);
            statement = withPotentialTimeout(method, test, statement);
 
-           final Object testObj = test;
-           final Statement testStatement = statement;
-
-           Statement arounds = withBefores(method, test, testStatement);
+           Statement arounds = withBefores(method, test, statement);
            arounds = withAfters(method, test, arounds);
-           arounds = (Statement)withRules.invoke(this, new Object[] {method, test, arounds});
-           final Statement withArounds = arounds;
+           final Statement stmtwithLifecycle = arounds;
+           final Statement stmtWithRules = (Statement)withRules.invoke(this, new Object[] {method, test, arounds});
            return new Statement() {
 
                @Override
                public void evaluate() throws Throwable {
-                   List<Throwable> exceptions = new ArrayList<Throwable>();
-                   try {
-                       final AtomicInteger integer = new AtomicInteger();
-                       adaptor.before(testObj, method.getMethod(), new LifecycleMethodExecutor() {
-                           @Override
-                           public void invoke() throws Throwable {
-                               integer.incrementAndGet();
-                           }
-                       });
-                       try {
-                           State.caughtExceptionAfterJunit(null);
-                           if(integer.get() > 0) {
-                               withArounds.evaluate();
-                           } else {
-                               testStatement.evaluate();
+                   State.caughtExceptionAfterJunit(null);
+                   final AtomicInteger integer = new AtomicInteger();
+                   
+                   adaptor.fire(new AroundRules(test, method.getMethod(), new LifecycleMethodExecutor() {
+                       @Override
+                       public void invoke() throws Throwable {
+                           integer.incrementAndGet();
+                           try {
+                               stmtWithRules.evaluate();
+                           } catch(Throwable t) {
+                               State.caughtExceptionAfterJunit(t);
+                               adaptor.fire(new AfterAroundRules(test, method.getMethod(), LifecycleMethodExecutor.NO_OP));
+                               throw t;
                            }
                        }
-                       catch (Throwable e) {
-                           State.caughtExceptionAfterJunit(e);
-                           exceptions.add(e);
-                       }
-                   } finally {
+                   }));
+                   // If AroundRules (includes lifecycles) were not executed, invoke only lifecycles+test
+                   if(integer.get() == 0) {
+                       State.caughtExceptionAfterJunit(null);
                        try {
-                           adaptor.after(testObj, method.getMethod(), LifecycleMethodExecutor.NO_OP);
+                           stmtwithLifecycle.evaluate();
+                       } catch(Throwable t) {
+                           State.caughtExceptionAfterJunit(t);
+                           throw t;
                        }
-                       catch(Throwable e) {
-                           exceptions.add(e);
-                       }
                    }
-                   if(exceptions.isEmpty())
-                   {
-                      return;
-                   }
-                   if(exceptions.size() == 1)
-                   {
-                      throw exceptions.get(0);
-                   }
-                   throw new MultipleFailureException(exceptions);
                }
            };
        } catch(Exception e) {
