@@ -16,13 +16,12 @@
  */
 package org.jboss.arquillian.junit.extension;
 
-import junit.framework.Assert;
-
 import org.jboss.arquillian.core.spi.EventContext;
 import org.jboss.arquillian.junit.State;
 import org.jboss.arquillian.test.spi.TestResult;
 import org.jboss.arquillian.test.spi.TestResult.Status;
 import org.jboss.arquillian.test.spi.event.suite.AfterTestLifecycleEvent;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.RunWith;
@@ -65,6 +64,19 @@ public class UpdateTestResultBeforeAfterTestCase {
 
         new UpdateTestResultBeforeAfter().update(event, result);
         State.caughtExceptionAfterJunit(null);
+
+        Assert.assertEquals(Status.FAILED, result.getStatus());
+        Assert.assertNotNull(result.getThrowable());
+        Assert.assertTrue(result.getThrowable() instanceof AssertionError);
+    }
+
+    @Test
+    public void shouldFailResultIfExceptionTestResultIsFailed() throws Exception {
+        State.caughtTestException(new AssertionError("A"));
+        TestResult result = TestResult.failed(new AssertionError("A"));
+
+        new UpdateTestResultBeforeAfter().update(event, result);
+        State.caughtTestException(null);
 
         Assert.assertEquals(Status.FAILED, result.getStatus());
         Assert.assertNotNull(result.getThrowable());

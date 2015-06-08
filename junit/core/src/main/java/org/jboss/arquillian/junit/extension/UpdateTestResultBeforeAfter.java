@@ -36,22 +36,29 @@ class UpdateTestResultBeforeAfter
     {
         if(State.caughtExceptionAfterJunit() != null)
         {
-            if(State.caughtExceptionAfterJunit() instanceof AssumptionViolatedException)
-            {
-                result.setStatus(TestResult.Status.SKIPPED);
-            }
-            else
-            {
-                result.setStatus(TestResult.Status.FAILED);
-            }
-            result.setThrowable(State.caughtExceptionAfterJunit());
+            updateResult(State.caughtExceptionAfterJunit(), result);
         }
-        else
+        else if (State.hasTestException())
         {
+            updateResult(State.getTestException(), result);
+        }
+        else {
             result.setStatus(Status.PASSED);
             result.setThrowable(null);
         }
         context.proceed();
     }
+
+	private void updateResult(Throwable exception, TestResult result) {
+		if(exception instanceof AssumptionViolatedException)
+		{
+		    result.setStatus(TestResult.Status.SKIPPED);
+		}
+		else
+		{
+		    result.setStatus(TestResult.Status.FAILED);
+		}
+        result.setThrowable(exception);
+	}
 }
 
